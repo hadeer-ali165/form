@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>نموذج تسجيل الطالب</title>
+  <style>
+    body { font-family: Arial; max-width: 600px; margin: auto; padding: 20px; }
+    label { display: block; margin-top: 10px; }
+    input, select, textarea { width: 100%; padding: 8px; margin-top: 5px; }
+    .hidden { display: none; }
+    button { margin-top: 15px; padding: 10px 20px; background-color: green; color: white; border: none; }
+  </style>
+</head>
+<body>
+  <h2>نموذج تسجيل الطالب</h2>
+  <form id="studentForm">
+    <label>الاسم الكامل:
+      <input type="text" name="name" required>
+    </label>
+
+    <label>رقم الهاتف:
+      <input type="tel" name="phone" required>
+    </label>
+
+    <label>العنوان:
+      <input type="text" name="address" required>
+    </label>
+
+    <label>السن:
+      <input type="number" name="age" required>
+    </label>
+
+    <label>هل تمتلك لابتوب؟
+      <select name="hasLaptop" required>
+        <option value="">اختر...</option>
+        <option value="نعم">نعم</option>
+        <option value="لا">لا</option>
+      </select>
+    </label>
+
+    <label>كيف عرفت عن الأكاديمية؟
+      <select name="referral" required>
+        <option value="">اختر...</option>
+        <option value="فيسبوك">فيسبوك</option>
+        <option value="إنستجرام">إنستجرام</option>
+        <option value="صديق">صديق</option>
+        <option value="أخرى">أخرى</option>
+      </select>
+    </label>
+
+    <label>هل لديك خلفية في البرمجة؟
+      <select name="hasBackground" id="hasBackground" required>
+        <option value="">اختر...</option>
+        <option value="نعم">نعم</option>
+        <option value="لا">لا</option>
+      </select>
+    </label>
+
+    <div id="backgroundDetailsDiv" class="hidden">
+      <label>ما الذي درسته من قبل؟
+        <input type="text" name="backgroundDetails" id="backgroundDetails">
+      </label>
+    </div>
+
+    <label>تحب الحضور:
+      <select name="attendance" required>
+        <option value="">اختر...</option>
+        <option value="أونلاين">أونلاين</option>
+        <option value="أوفلاين">أوفلاين</option>
+      </select>
+    </label>
+
+    <button type="submit">إرسال</button>
+  </form>
+
+  <p id="response" style="margin-top: 20px;"></p>
+
+  <script>
+    const form = document.getElementById('studentForm');
+    const hasBackground = document.getElementById('hasBackground');
+    const backgroundDetailsDiv = document.getElementById('backgroundDetailsDiv');
+    const backgroundDetailsInput = document.getElementById('backgroundDetails');
+    const responseEl = document.getElementById('response');
+
+    // إظهار أو إخفاء خانة الخلفية البرمجية
+    hasBackground.addEventListener('change', function () {
+      if (this.value === 'نعم') {
+        backgroundDetailsDiv.classList.remove('hidden');
+        backgroundDetailsInput.required = true;
+      } else {
+        backgroundDetailsDiv.classList.add('hidden');
+        backgroundDetailsInput.required = false;
+        backgroundDetailsInput.value = '';
+      }
+    });
+
+    // عند إرسال النموذج
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+      const data = {};
+
+      for (let [key, value] of formData.entries()) {
+        if (value.trim() === '' && key !== 'backgroundDetails') {
+          responseEl.textContent = 'من فضلك املأ جميع الحقول المطلوبة.';
+          responseEl.style.color = 'red';
+          return;
+        }
+        data[key] = value.trim();
+      }
+      console.log("بيانات المرسلة:", data);
+      fetch("https://script.google.com/macros/s/AKfycbwc9eL9jGMpsGEz-lcW5KCtU2M3ctHSJJtMmDpCJcLDAJ4UPCNaaDliFdYWx9-j6v5_ag/exec", {
+        method: "OPTIONS",
+        body: JSON.stringify(data),
+        headers: {
+          "Content-Type": "application/json"
+        }
+      })
+      .then(res => res.text())
+      .then(msg => {
+        responseEl.textContent = msg;
+        responseEl.style.color = 'green';
+        form.reset();
+        backgroundDetailsDiv.classList.add('hidden');
+      })
+      .catch(err => {
+        responseEl.textContent = 'حدث خطأ أثناء الإرسال. حاول مرة أخرى.';
+        responseEl.style.color = 'red';
+        console.error(err);
+      });
+    });
+  </script>
+</body>
+</html>
